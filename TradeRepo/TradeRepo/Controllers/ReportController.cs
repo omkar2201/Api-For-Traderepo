@@ -453,52 +453,173 @@ namespace TradeRepo.Controllers
 
                         if (filtname == "Product_Name")
                         {
-                            str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductName like " + "'%" + value + "%'"; //+
-                              //  "where ProductName="+value;
-                            
+                            if (type1 == 0)
+                            {
+                                str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductName like " + "'%" + value + "%'";
+                                //  "where ProductName="+value;
+                            }
+                            else
+                            {
+                                str = "SELECT ProductName,QTY,Total1,Total " + "from " + "TXN where ProductName like " + "'%" + value + "%'";
+                            }
+
                         }
 
                         if (filtname == "Product_Code")
                         {
-                            str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductCode like" + "'%" + value + "%'";
+                            if (type1 == 0)
+                            {
+                                str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductCode like" + "'%" + value + "%'";
+                            }
+                            else
+                            {
+                                str = "SELECT p.ProductName,p.QTY,p.Total1,p.Total " + "from " + "TXN p,ProductDB pr where p.ProductCode like " + "'%" + value + "%'" + " and pr.ProductName = p.ProductName";
+                            }
                         }
-                        //if()
-                        //{
 
-                        //}
+                        if (str == "")
+                        {
+                            return ErrorReport();
+                        }
+
+                        SqlCommand cmd = new SqlCommand(str, connection);
+                        SqlDataReader dr = cmd.ExecuteReader();
+                        if (type1 == 0)
+                        {
+                            while (dr.Read())
+                            {
+                                if (dr["ProductName"].ToString() == null)
+                                {
+                                    break;
+
+                                }
+                                filt.Add(dr["ProductName"].ToString());
+                                filt.Add(dr["PurchasePrice"].ToString());
+                                filt.Add(dr["SalePrice"].ToString());
+                                filt.Add(dr["Safty_Stock"].ToString());
+                                filt.Add(dr["Inventory"].ToString());
+                                filt.Add(dr["Tax1"].ToString());
+                            }
+                            Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
+
+
+                            for (int j = 0; j < filt.Count; j++)
+                            {
+                                ApiList.Add("Product_Name", filt[j]);
+
+                                ApiList.Add("Purchase_Price", filt[++j]);
+
+                                ApiList.Add("Sales_Price", filt[++j]);
+
+                                ApiList.Add("Safety_Stock", filt[++j]);
+
+                                ApiList.Add("Available_Stock", filt[++j]);
+
+                                ApiList.Add("Tax_Name", filt[++j]);
+
+                                string serializedJson = JsonConvert.SerializeObject(ApiList);
+                                var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
+
+
+                                array.Add(deserializedJson);
+                                ApiList.Clear();
+
+
+                            }
+
+
+                        }
+                        if (type1 == 1)
+                        {
+                            while (dr.Read())
+                            {
+
+                                filt.Add(dr["ProductName"].ToString());
+                                filt.Add(dr["QTY"].ToString());
+                                filt.Add(dr["Total1"].ToString());
+                                filt.Add(dr["Total"].ToString());
+
+                            }
+                            Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
+
+                            for (int j = 0; j < filt.Count; j++)
+                            {
+                                ApiList.Add("Product_Name", filt[j]);
+
+                                ApiList.Add("Quantity", filt[++j]);
+
+                                ApiList.Add("Purchase_Total", filt[++j]);
+
+                                ApiList.Add("Sell_Total", filt[++j]);
+
+                                string serializedJson = JsonConvert.SerializeObject(ApiList);
+                                var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
+
+
+                                array.Add(deserializedJson);
+                                ApiList.Clear();
+
+                            }
+                        }
+                    }
+                    if (type1 == 1)
+                    {
+
+                    }
+                    break;
+
+                case 1:
+                    ArrayList filt1 = new ArrayList();
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
+                    {
+                        try
+                        {
+                            connection.Open();
+                        }
+                        catch
+                        {
+                            return ErrorReport();
+                        }
+
+                        if (filtname == "Customer_Name")
+                        {
+                            str = "SELECT c.CustomerName,c.PhoneNo,c.Balance_Pay,cs.col2 " + "from " + "CustomerDB c,CustSupExtraInfo cs where c.CustomerName like " + "'%" + value + "%'" + "and c.CustomerName = cs.CustSupName";
+                            //  "where ProductName="+value;
+
+                        }
+                        if (str == "")
+                        {
+                            return ErrorReport();
+                        }
+
+
                         SqlCommand cmd = new SqlCommand(str, connection);
                         SqlDataReader dr = cmd.ExecuteReader();
 
                         while (dr.Read())
                         {
-                            if (dr["ProductName"].ToString() == null)
+                            if (dr["CustomerName"].ToString() == null)
                             {
                                 break;
 
                             }
-                            filt.Add(dr["ProductName"].ToString());
-                            filt.Add(dr["PurchasePrice"].ToString());
-                            filt.Add(dr["SalePrice"].ToString());
-                            filt.Add(dr["Safty_Stock"].ToString());
-                            filt.Add(dr["Inventory"].ToString());
-                            filt.Add(dr["Tax1"].ToString());
+                            filt1.Add(dr["CustomerName"].ToString());
+                            filt1.Add(dr["PhoneNo"].ToString());
+                            filt1.Add(dr["Balance_Pay"].ToString());
+                            filt1.Add(dr["col2"].ToString());
                         }
                         Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
 
 
-                        for (int j = 0; j < filt.Count; j++)
+                        for (int j = 0; j < filt1.Count; j++)
                         {
-                            ApiList.Add("Product_Name", filt[j]);
+                            ApiList.Add("Customer_Name", filt1[j]);
 
-                            ApiList.Add("Purchase_Price", filt[++j]);
+                            ApiList.Add("Phone_Number", filt1[++j]);
 
-                            ApiList.Add("Sales_Price", filt[++j]);
+                            ApiList.Add("Balance_Payment", filt1[++j]);
 
-                            ApiList.Add("Safety_Stock", filt[++j]);
-
-                            ApiList.Add("Available_Stock", filt[++j]);
-
-                            ApiList.Add("Tax_Name", filt[++j]);
+                            ApiList.Add("Credit_Limit", filt1[++j]);
 
                             string serializedJson = JsonConvert.SerializeObject(ApiList);
                             var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
@@ -510,110 +631,215 @@ namespace TradeRepo.Controllers
 
                         }
 
-                       
+
                     }
                     break;
 
-               /* case 1:
-                    string str = "";
-                    string ConnectionString = "server=43.255.152.26" + ";database=" + dbname + "; User ID=Admin2" + "; Password=" + "Fgke14#9";
-                    JArray array = new JArray();
+                case 2:
 
-                    switch (type2)
+                    ArrayList filt2 = new ArrayList();
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
                     {
-                        case 0:
-                            ArrayList filt = new ArrayList();
-                            using (SqlConnection connection = new SqlConnection(ConnectionString))
+                        try
+                        {
+                            connection.Open();
+                        }
+                        catch
+                        {
+                            return ErrorReport();
+                        }
+
+                        if (filtname == "Supplier_Name")
+                        {
+                            str = "SELECT s.SupplierName,s.PhoneNo,s.Balance_Due,cs.col2 " + "from " + "SupplierDB s,CustSupExtraInfo cs where s.SupplierName like " + "'%" + value + "%'" + " and s.SupplierName=cs.CustSupName";
+
+                        }
+                        else
+                        {
+                            return ErrorReport();
+                        }
+
+                        SqlCommand cmd = new SqlCommand(str, connection);
+                        SqlDataReader dr = cmd.ExecuteReader();
+
+                        while (dr.Read())
+                        {
+                            if (dr["SupplierName"].ToString() == null)
                             {
-                                try
-                                {
-                                    connection.Open();
-                                }
-                                catch
-                                {
-                                    return ErrorReport();
-                                }
-
-                                if (filtname == "Product_Name")
-                                {
-                                    str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductName=" + "'" + value + "'"; //+
-                                                                                                                                                                                   //  "where ProductName="+value;
-
-                                }
-
-                                if (filtname == "Product_Code")
-                                {
-                                    str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductCode=" + "'" + value + "'";
-                                }
-
-                                if (str == "")
-                                {
-                                    return ErrorReport();
-                                }
-                                SqlCommand cmd = new SqlCommand(str, connection);
-                                SqlDataReader dr = cmd.ExecuteReader();
-
-                                while (dr.Read())
-                                {
-                                    if (dr["ProductName"].ToString() == null)
-                                    {
-                                        break;
-
-                                    }
-                                    filt.Add(dr["ProductName"].ToString());
-                                    filt.Add(dr["PurchasePrice"].ToString());
-                                    filt.Add(dr["SalePrice"].ToString());
-                                    filt.Add(dr["Safty_Stock"].ToString());
-                                    filt.Add(dr["Inventory"].ToString());
-                                    filt.Add(dr["Tax1"].ToString());
-                                }
-                                Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
-
-
-                                for (int j = 0; j < filt.Count; j++)
-                                {
-                                    ApiList.Add("Product_Name", filt[j]);
-
-                                    ApiList.Add("Purchase_Price", filt[++j]);
-
-                                    ApiList.Add("Sales_Price", filt[++j]);
-
-                                    ApiList.Add("Safety_Stock", filt[++j]);
-
-                                    ApiList.Add("Available_Stock", filt[++j]);
-
-                                    ApiList.Add("Tax_Name", filt[++j]);
-
-                                    string serializedJson = JsonConvert.SerializeObject(ApiList);
-                                    var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
-
-
-                                    array.Add(deserializedJson);
-                                    ApiList.Clear();
-
-
-                                }
-
-
+                                break;
                             }
+                            filt2.Add(dr["SupplierName"].ToString());
+                            filt2.Add(dr["PhoneNo"].ToString());
+                            filt2.Add(dr["Balance_Due"].ToString());
+                            filt2.Add(dr["col2"].ToString());
 
-                            break; */
+                        }
+                        Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
+
+
+                        for (int j = 0; j < filt2.Count; j++)
+                        {
+                            ApiList.Add("Supplier_Name", filt2[j]);
+
+                            ApiList.Add("Phone_Number", filt2[++j]);
+
+                            ApiList.Add("Balance_Dues", filt2[++j]);
+
+                            ApiList.Add("Credit_Limit", filt2[++j]);
+
+                            string serializedJson = JsonConvert.SerializeObject(ApiList);
+                            var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
+
+
+                            array.Add(deserializedJson);
+                            ApiList.Clear();
+
+
+                        }
+
+
+                    }
+                    break;
+
+                case 3:
+                    ArrayList filt3 = new ArrayList();
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
+                    {
+                        try
+                        {
+                            connection.Open();
+                        }
+                        catch
+                        {
+                            return ErrorReport();
+                        }
+
+                        //IN("+"'"+filtname+"',"+"'"+value+"')"
+                        str = "SELECT top 10 Date,BillNoAgainst,PayNo,NetPay,PayType " + "from " + "PaySummary where Date BETWEEN '" + filtname + "'" + " and '" + value + "'";
+
+                        SqlCommand cmd = new SqlCommand(str, connection);
+                        SqlDataReader dr = cmd.ExecuteReader();
+
+                        while (dr.Read())
+                        {
+                            filt3.Add(dr["Date"].ToString());
+                            filt3.Add(dr["BillNoAgainst"].ToString());
+                            filt3.Add(dr["PayNo"].ToString());
+                            filt3.Add(dr["NetPay"].ToString());
+                            filt3.Add(dr["PayType"].ToString());
+
+                        }
+                        Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
+
+
+                        for (int j = 0; j < filt3.Count; j++)
+                        {
+                            ApiList.Add("Date", filt3[j]);
+
+                            ApiList.Add("Report_Number", filt3[++j]);
+
+                            ApiList.Add("Payment_Number", filt3[++j]);
+
+                            ApiList.Add("Amount", filt3[++j]);
+
+                            ApiList.Add("Type", filt3[++j]);
+
+                            string serializedJson = JsonConvert.SerializeObject(ApiList);
+                            var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
+
+
+                            array.Add(deserializedJson);
+                            ApiList.Clear();
+
+
+                        }
+
+
+                    }
+                    break;
+
+
 
                 default:
                     return ErrorReport();
-                   
+
 
             }
             return array;
         }
 
         [HttpGet]
-        [Route("{dbname}/query/{type1}/{fname}/{value1}/{pname}/{value2}")]
-        public JArray Getfilter(string dbname, int type1,string fname, string value1,string pname,string value2)
+        [Route("{dbname}/query/{value1}/{value2}")]
+        public JArray Getfilter(string dbname, string value1, string value2)
         {
-            return ErrorReport();
-        }
+            string ConnectionString = "server=43.255.152.26" + ";database=" + dbname + "; User ID=Admin2" + "; Password=" + "Fgke14#9";
+            JArray array = new JArray();
+            ArrayList filt = new ArrayList();
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                }
+                catch
+                {
+                    return ErrorReport();
+                }
 
+
+                String str = "SELECT ProductName,PurchasePrice,SalePrice,Safty_Stock,Inventory,Tax1 " + "from " + "ProductDB where ProductName like " + "'%" + value1 + "%'" + " or ProductCode like " + "'%" + value2 + "%'";
+
+
+
+                SqlCommand cmd = new SqlCommand(str, connection);
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    if (dr["ProductName"].ToString() == null)
+                    {
+                        break;
+
+                    }
+                    filt.Add(dr["ProductName"].ToString());
+                    filt.Add(dr["PurchasePrice"].ToString());
+                    filt.Add(dr["SalePrice"].ToString());
+                    filt.Add(dr["Safty_Stock"].ToString());
+                    filt.Add(dr["Inventory"].ToString());
+                    filt.Add(dr["Tax1"].ToString());
+                }
+                Dictionary<dynamic, dynamic> ApiList = new Dictionary<dynamic, dynamic>();
+
+
+                for (int j = 0; j < filt.Count; j++)
+                {
+                    ApiList.Add("Product_Name", filt[j]);
+
+                    ApiList.Add("Purchase_Price", filt[++j]);
+
+                    ApiList.Add("Sales_Price", filt[++j]);
+
+                    ApiList.Add("Safety_Stock", filt[++j]);
+
+                    ApiList.Add("Available_Stock", filt[++j]);
+
+                    ApiList.Add("Tax_Name", filt[++j]);
+
+                    string serializedJson = JsonConvert.SerializeObject(ApiList);
+                    var deserializedJson = (JObject)JsonConvert.DeserializeObject<dynamic>(serializedJson);
+
+
+                    array.Add(deserializedJson);
+                    ApiList.Clear();
+
+
+                }
+
+
+            }
+
+            return array;
+        }
     }
 }
 
@@ -621,5 +847,4 @@ namespace TradeRepo.Controllers
 
 
 
-//dbname/query/type_Report/filter_Name/value
 
